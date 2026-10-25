@@ -157,9 +157,29 @@ jobs:
           fi
 
       - name: Build release APK
+        # GitHub hides the raw log from anyone who is not signed in, but the
+        # annotations of a public run are readable by everyone, so a failed
+        # build reports its own Gradle error here instead of just "exit 1".
         run: |
+          set +e
           flutter build apk --release --split-per-abi \
-            --target-platform "${{ steps.abi.outputs.platform }}"
+            --target-platform "${{ steps.abi.outputs.platform }}" \
+            > build.log 2>&1
+          rc=$?
+          {
+            echo "flutter build exit code: $rc"
+            echo "--- what went wrong ---"
+            sed -n '/What went wrong/,/^\* Try/p' build.log | tail -n 45
+            echo "--- tail of the log ---"
+            grep -vE '^\s*$' build.log | tail -n 45
+          } > build-report.txt
+          if [ "$rc" -ne 0 ]; then
+            msg=$(sed 's/%/%25/g' build-report.txt | paste -sd '%0A' -)
+            echo "::error title=flutter build failed (exit $rc)::$msg"
+          else
+            tail -n 15 build-report.txt
+          fi
+          exit "$rc"
 
       - name: Collect artifacts
         run: |
