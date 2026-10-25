@@ -1,6 +1,6 @@
 # Navigo
 
-![Release APK](https://github.com/Vincentdiligent/Navigo/actions/workflows/release.yml/badge.svg?branch=main)
+![Release APK](https://github.com/Vincentdiligent/Navigo/actions/workflows/release.yml/badge.svg)
 
 Premium navigator for Android: MapLibre vector cartography with two
 from-scratch map themes (Atlas by day, Onyx by night), turn-by-turn voice
