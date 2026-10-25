@@ -85,6 +85,25 @@ them to [Releases](https://github.com/Vincentdiligent/Navigo/releases). The
 **Run workflow** button produces the same APKs as a downloadable artifact
 without publishing.
 
+## Installing an APK
+
+Every release carries two files, and one is enough:
+
+| File | Install it on |
+| --- | --- |
+| `…-arm64-v8a.apk` | practically any phone of the last eight years |
+| `…-armeabi-v7a.apk` | older 32-bit devices |
+
+Both are signed with the same release key, so a new release installs over an
+older one and keeps saved places, downloaded regions and settings. An APK built
+on your own machine — or by a fork — is signed with a debug key instead, and
+Android will refuse to install it over a released build, or the other way
+round, until the existing app is removed. That is a signature rule, not a bug.
+
+Navigo is not on Google Play, so allow this source when Android asks. Offline
+maps and voices are stored on the device, so keep a few hundred megabytes free
+before downloading regions.
+
 ## Data sources and licenses
 
 - Map data © [OpenStreetMap](https://www.openstreetmap.org/copyright)
