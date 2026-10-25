@@ -241,6 +241,10 @@ jobs:
               --notes-file release-notes.md \
               out/*.apk
           fi
+          # Deleting a tag to move it turns its release into a draft, and a
+          # draft is invisible to everyone but the author, so a re-run would
+          # silently unpublish the app. Always hand it back to the world.
+          gh release edit "$GITHUB_REF_NAME" --draft=false --latest
           gh release view "$GITHUB_REF_NAME" --json tagName,assets \
             --jq '.tagName + ": " + ([.assets[].name] | join(", "))'
 
