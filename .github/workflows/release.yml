@@ -127,10 +127,21 @@ jobs:
       - name: Resolve dependencies
         run: flutter pub get
 
+      - name: Resolve which ABIs to build
+        id: abi
+        run: |
+          # A manual run honours the chosen ABI; a tag always ships the full
+          # set, so a GitHub Release never contains an arm64-only surprise.
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "platform=${{ inputs.target_platform }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "platform=android-arm,android-arm64" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Build release APK
         run: |
           flutter build apk --release --split-per-abi \
-            --target-platform "${{ inputs.target_platform || 'android-arm64' }}"
+            --target-platform "${{ steps.abi.outputs.platform }}"
 
       - name: Collect artifacts
         run: |
@@ -150,13 +161,16 @@ jobs:
           {
             printf '## Navigo %s\n\n' "$GITHUB_REF_NAME"
             printf 'Built by GitHub Actions from this tag on a clean runner:\n\n'
-            printf '```\nflutter build apk --release --split-per-abi --target-platform android-arm64\n```\n\n'
-            printf '| File | ABI | Install on |\n| --- | --- | --- |\n'
-            printf '| `*-arm64-v8a-release.apk` | arm64 | almost every phone since 2019 |\n'
-            printf '| `*-armeabi-v7a-release.apk` | arm 32-bit | older and budget devices |\n\n'
-            printf 'Map data (c) OpenStreetMap contributors, tiles by OpenFreeMap -\n'
+            printf '```\nflutter build apk --release --split-per-abi\n```\n\n'
+            printf '| File | ABI |\n| --- | --- |\n'
+            for f in out/*.apk; do
+              abi=$(basename "$f" | sed 's/.*-\([a-z0-9-]*\)\.apk$/\1/')
+              printf '| `%s` | %s |\n' "$(basename "$f")" "$abi"
+            done
+            printf '\nMap data (c) OpenStreetMap contributors, tiles by OpenFreeMap -\n'
             printf 'the README carries the full data and license list.\n'
           } > release-notes.md
+          cat release-notes.md
 
       - name: Publish GitHub Release
         if: startsWith(github.ref, 'refs/tags/v')
