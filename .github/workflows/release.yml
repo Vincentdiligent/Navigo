@@ -52,7 +52,8 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        # v4 is deprecated (Node 20) and GitHub says it stops receiving updates.
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "21"
@@ -63,11 +64,18 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
 
-      - name: Drop machine-local Gradle settings
-        # android/gradle.properties pins org.gradle.java.home to a JDK path
-        # that only exists on the developer's Windows laptop. On the runner,
-        # JAVA_HOME from setup-java is the right answer, so drop the line.
-        run: sed -i '/^org.gradle.java.home=/d' android/gradle.properties
+      - name: Adapt machine-local Gradle settings
+        # android/gradle.properties is tuned for the developer's laptop: it
+        # pins org.gradle.java.home to a Windows JDK path that does not exist
+        # here, and it caps the daemon heap at 1100 MB. R8 needs more than
+        # 1100 MB on this app - run #6 died in :app:minifyReleaseWithR8 with
+        # "ERROR: R8: java.lang.OutOfMemoryError: Java heap space". The runner
+        # has RAM to spare, so the heap is raised here instead of loosening
+        # the limit on the laptop that cannot afford it.
+        run: |
+          sed -i '/^org.gradle.java.home=/d' android/gradle.properties
+          sed -i 's/^org.gradle.jvmargs=.*/org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=768m/' android/gradle.properties
+          grep -E '^org\.gradle' android/gradle.properties
 
       - name: Make sure compileSdk 36 is installed
         # 36 is Flutter 3.44's default flutter.compileSdkVersion. Runner images
