@@ -1,0 +1,66 @@
+name: navigo
+description: "Navigo v5 — bulletproof hosted cartography (pre-flight style probe, auto-recovery, idempotent overlays), sectioned settings bottom sheet with a full-screen theme picker, offline regions manager (countries & regions), bottom-sheet-first UI, camera memory across restarts and racing multi-backend routing."
+publish_to: 'none'
+
+version: 6.9.0+11813
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # Maps — MapLibre GL (vector tiles, raster overlays, hillshade)
+  maplibre_gl: ^0.27.0
+
+  # GPS
+  geolocator: ^14.0.2
+
+  # Voice guidance
+  flutter_tts: ^4.2.5
+
+  # v6.8 offline voice: on-device neural TTS. Pinned EXACTLY — 2.0.0 dropped
+  # the espeak-ng / piper-phonemize phonemizer, so a Piper .onnx fed plain
+  # text starts answering with empty audio. Do not widen this range.
+  sherpa_onnx: 1.13.8
+  audioplayers: ^6.8.1
+  archive: ^4.5.2
+
+  # State management
+  provider: ^6.1.5+1
+
+  # Networking
+  http: ^1.6.0
+
+  # Local storage
+  path_provider: ">=2.1.0 <3.0.0"
+  shared_preferences: ">=2.3.0 <3.0.0"
+
+  # Utils
+  intl: ^0.20.2
+  flutter_compass: ^0.8.1
+  url_launcher: ^6.3.3
+
+# Sandbox build constraint: path_provider_android >=2.3 pulls the `jni`
+# package which compiles native C++ via CMake/NDK; 2.2.x ships the same
+# plugin API as pure Java/Kotlin.
+dependency_overrides:
+  path_provider_android: 2.2.10
+  shared_preferences_android: 2.4.10
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+
+  # The espeak-ng phonemizer tables Piper voices need (~400 KB). Ships as one
+  # zip because Flutter cannot declare a directory tree in one line; the app
+  # unpacks it into its own support dir on first offline speech.
+  assets:
+    - assets/tts/espeak-ng-data.zip

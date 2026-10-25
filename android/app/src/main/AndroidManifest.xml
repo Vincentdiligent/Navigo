@@ -1,0 +1,97 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Location: asked in-context on first map display (while-in-use is
+         enough; the foreground service keeps navigation alive with the
+         screen off). -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <!-- Android 13+ runtime notification permission (turn announcements). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!-- geolocator navigation stream foreground service. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>
+
+    <!-- Legacy shared-storage access (Android ≤ 12): favorites GeoJSON
+         export, offline debugging dumps. Android 13+ uses scoped storage
+         where app-private dirs need NO permission. The user explicitly
+         reported the "check device memory" error — these remove the
+         permission class of failures entirely. -->
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32"/>
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32"/>
+
+    <!-- GPS is optional hardware: the app works without it (search/route
+         planning from manually picked points). -->
+    <uses-feature android:name="android.hardware.location.gps" android:required="false"/>
+
+    <!-- v5.7: locked-screen navigation — the location foreground service
+         keeps guidance (GPS + notifications + TTS) alive when the user
+         locks the phone or leaves the app. -->
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
+
+    <application
+        android:label="Navigo"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher"
+        android:requestLegacyExternalStorage="true"
+        android:enableOnBackInvokedCallback="true">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:taskAffinity=""
+            android:theme="@style/LaunchTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize">
+            <meta-data
+              android:name="io.flutter.embedding.android.NormalTheme"
+              android:resource="@style/NormalTheme"
+              />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
+
+        <!-- v5.7: navigation foreground service (locked-screen guidance +
+             the turn-by-turn notification). -->
+        <service
+            android:name=".NavService"
+            android:exported="false"
+            android:foregroundServiceType="location"/>
+    </application>
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.PROCESS_TEXT"/>
+            <data android:mimeType="text/plain"/>
+        </intent>
+        <!-- v6.2 CRITICAL FIX («голосовые подсказки не работают»): the TTS
+             engine (Google TTS etc.) is a THIRD-PARTY app. On Android 11+
+             package visibility silently blocks TextToSpeech from binding to
+             it unless this exact intent is declared — the documented
+             requirement for every app that speaks. -->
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE"/>
+        </intent>
+        <!-- v5.9: the place card can CALL the venue (tel:) and open its
+             website in the browser — Android 11+ package visibility needs
+             these declared up-front. -->
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="https"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.DIAL"/>
+            <data android:scheme="tel"/>
+        </intent>
+    </queries>
+</manifest>

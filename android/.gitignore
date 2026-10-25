@@ -1,0 +1,17 @@
+/.gradle
+/captures/
+/local.properties
+GeneratedPluginRegistrant.java
+.cxx/
+.kotlin/
+
+# Remember to never publicly share your keystore.
+# See https://flutter.dev/to/reference-keystore
+key.properties
+**/*.keystore
+**/*.jks
+
+# The Gradle wrapper is deliberately NOT ignored here. The stock Flutter
+# template hid `gradlew`, `gradlew.bat` and `gradle-wrapper.jar`; without them
+# GitHub Actions has no wrapper to invoke and the release build cannot start.
+# Gradle's own guidance is to commit the wrapper.
