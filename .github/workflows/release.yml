@@ -6,11 +6,14 @@ name: Release APK
 #   * push a tag  v6.9.0   -> full GitHub Release with the APKs attached
 #   * "Run workflow" button -> build + downloadable artifact, no release
 #
-# The signing identity is NOT in this repository. It is injected from the
-# repository secrets listed in the README under "Releases". A tag only becomes
-# a GitHub Release when those secrets exist; without them the build still runs
-# and still produces an APK, but that APK carries the runner's throwaway debug
-# key, so it is kept as a build artifact instead of being published.
+# The signing identity is NOT in this repository. To publish signed releases,
+# create these protected repository secrets (Settings → Secrets and variables
+# → Actions): KEYSTORE_BASE64 (the keystore, base64-encoded), KEYSTORE_FILE_NAME
+# (the file name storeFile expects), KEY_ALIAS, KEY_PASSWORD, STORE_PASSWORD.
+# Only names appear here; the values never enter the repository or the logs.
+# A tag is published as a GitHub Release only when those secrets exist; without
+# them the build still produces an APK, but it carries the runner's throwaway
+# debug key, so it is kept as a build artifact instead of being released.
 
 on:
   workflow_dispatch:
@@ -136,7 +139,8 @@ jobs:
         run: |
           echo "::warning::KEYSTORE_BASE64 is not set, so this APK is signed"
           echo "::warning::with the runner's throwaway debug key and cannot be"
-          echo "::warning::installed over an existing Navigo. See README Releases."
+          echo "::warning::installed over an existing Navigo. See the secrets list"
+          echo "::warning::at the top of .github/workflows/release.yml."
 
       - name: Resolve dependencies
         run: flutter pub get
@@ -206,8 +210,8 @@ jobs:
         run: |
           echo "::notice::No signing identity in this repository, so tag"
           echo "::notice::$GITHUB_REF_NAME was NOT published as a GitHub Release."
-          echo "::notice::Add the secrets from the README, then re-run this workflow"
-          echo "::notice::on the tag (or push it again) to release the signed APKs."
+          echo "::notice::Add the secrets listed at the top of this workflow,"
+          echo "::notice::then re-run it on the tag to release the signed APKs."
 
       - name: Upload build artifacts
         # Every successful run keeps a downloadable copy: a manual run has no
