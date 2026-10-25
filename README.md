@@ -250,7 +250,10 @@ Tags like `v6.9.0` are built on GitHub's own runners by
 `.github/workflows/release.yml` and published to
 [Releases](https://github.com/Vincentdiligent/Navigo/releases) with an arm64
 and an armeabi-v7a APK attached. Pushing a tag is enough; the **Run workflow**
-button builds without releasing.
+button builds without releasing. A tag is only published once the signing
+secrets below exist — until then the run keeps the APKs as downloadable build
+artifacts, because an APK signed with a runner's throwaway key is not
+something to hand out.
 
 For the CI APK to carry the real Navigo certificate, add these repository
 secrets (Settings → Secrets and variables → Actions → New repository secret):

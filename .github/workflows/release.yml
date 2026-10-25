@@ -7,10 +7,10 @@ name: Release APK
 #   * "Run workflow" button -> build + downloadable artifact, no release
 #
 # The signing identity is NOT in this repository. It is injected from the
-# repository secrets listed in the README under "Releases". Without them the
-# build still runs and still produces an APK, but that APK is signed with the
-# throwaway debug key of the runner, so it cannot be installed over a Navigo
-# that is already on a phone.
+# repository secrets listed in the README under "Releases". A tag only becomes
+# a GitHub Release when those secrets exist; without them the build still runs
+# and still produces an APK, but that APK carries the runner's throwaway debug
+# key, so it is kept as a build artifact instead of being published.
 
 on:
   workflow_dispatch:
@@ -173,7 +173,10 @@ jobs:
           cat release-notes.md
 
       - name: Publish GitHub Release
-        if: startsWith(github.ref, 'refs/tags/v')
+        # Gated on the signing identity on purpose: an APK signed with a
+        # runner's throwaway debug key must not be published as a Navigo
+        # release that other phones cannot upgrade from.
+        if: ${{ startsWith(github.ref, 'refs/tags/v') && secrets.KEYSTORE_BASE64 != '' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -184,8 +187,18 @@ jobs:
             --notes-file release-notes.md \
             out/*.apk
 
+      - name: Skip the release when nothing can sign it
+        if: ${{ startsWith(github.ref, 'refs/tags/v') && secrets.KEYSTORE_BASE64 == '' }}
+        run: |
+          echo "::notice::No signing identity in this repository, so tag"
+          echo "::notice::$GITHUB_REF_NAME was NOT published as a GitHub Release."
+          echo "::notice::Add the secrets from the README, then re-run this workflow"
+          echo "::notice::on the tag (or push it again) to release the signed APKs."
+
       - name: Upload build artifacts
-        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+        # Every successful run keeps a downloadable copy: a manual run has no
+        # release at all, and an unsigned tag run would otherwise throw the
+        # APKs away with the runner.
         uses: actions/upload-artifact@v4
         with:
           name: Navigo-${{ steps.ver.outputs.full }}
