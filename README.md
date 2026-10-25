@@ -10,6 +10,32 @@ means something.
 Everything runs on free, keyless services. No API key, no account, no paid
 dependency.
 
+## Screens
+
+Atlas by day, Onyx by night — the same city at four scales, from the
+motorway grid down to individual POI chips.
+
+<table>
+  <tr>
+    <td align="center">
+      <img src="docs/screens/atlas-city-2km.jpg" width="228" alt="Atlas theme, city scale"><br>
+      <b>Atlas</b> · 2 km — road hierarchy, ring motorways, rail
+    </td>
+    <td align="center">
+      <img src="docs/screens/atlas-poi-200m.jpg" width="228" alt="Atlas theme, POI chips"><br>
+      <b>Atlas</b> · 200 m — category chips over the old centre
+    </td>
+    <td align="center">
+      <img src="docs/screens/onyx-region-200km.jpg" width="228" alt="Onyx theme, regional scale"><br>
+      <b>Onyx</b> · 200 km — the night network at country scale
+    </td>
+    <td align="center">
+      <img src="docs/screens/onyx-poi-100m.jpg" width="228" alt="Onyx theme, POI chips"><br>
+      <b>Onyx</b> · 100 m — muted chips on charcoal
+    </td>
+  </tr>
+</table>
+
 ## Features
 
 - **Two map themes in the Apple Maps school** — Atlas for day and Onyx for
